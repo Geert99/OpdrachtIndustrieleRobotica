@@ -61,7 +61,6 @@ class GetObjectPoseState(EventState):
 
   	-- object_frame		string		the objectd frame
 	-- ref_frame		string		reference frame for the part pose output key
-	-- time_out		float		Time with the camera to have detected the part
 	#> pose			PoseStamped	Pose of the detected part
 
 	<= continue 				if the pose of the object has been succesfully obtained
@@ -70,15 +69,12 @@ class GetObjectPoseState(EventState):
 	<= failed 				otherwise
 	'''
 
-	def __init__(self, object_frame, ref_frame, time_out = 5.0):
+	def __init__(self, object_frame, ref_frame):
 		# Declare outcomes, input_keys, and output_keys by calling the super constructor with the corresponding arguments.
-		super(GetObjectPoseState, self).__init__(outcomes = ['continue', 'time_out', 'failed'], output_keys = ['pose'])
+		super(GetObjectPoseState, self).__init__(outcomes = ['continue', 'failed'], output_keys = ['pose'])
 		self.ref_frame = ref_frame
 		self._object_frame = object_frame
 		self._failed = False
-
-		# Store state parameter for later use.
-		self._wait = time_out
 
 
 		# tf to transfor the object pose
@@ -94,25 +90,13 @@ class GetObjectPoseState(EventState):
 			userdata.pose = None
 			return 'failed'
 
-		elapsed = rospy.get_rostime() - self._start_time;
-		if (elapsed.to_sec() > self._wait):
-			return 'time_out'
-
 		pose_stamped = PoseStamped()
-		pose = Pose()
 
-		pose.position = self._transform.transform.translation
-		pose.orientation = self._transform.transform.rotation 
-
-		rospy.loginfo(pose)
-		rospy.loginfo(pose_stamped)
-
-		pose_stamped.pose = pose
-		pose_stamped.header.frame_id = self._object_frame
 		pose_stamped.header.stamp = rospy.Time.now()
 		# Transform the pose to desired output frame
 		pose_stamped = tf2_geometry_msgs.do_transform_pose(pose_stamped, self._transform)
-		rospy.loginfo(pose_stamped)
+		#rospy.loginfo("after transform:")
+		#rospy.loginfo(pose_stamped)
 		userdata.pose = pose_stamped
 		return 'continue'
 
@@ -126,8 +110,9 @@ class GetObjectPoseState(EventState):
 
 		# Get transform between world and robot_base
 		try:
-			self._transform = self._tf_buffer.lookup_transform(self._object_frame, self.ref_frame, rospy.Time(0), rospy.Duration(1.0))
-			rospy.loginfo(self._transform)
+			self._transform = self._tf_buffer.lookup_transform(self.ref_frame, self._object_frame, rospy.Time(0), rospy.Duration(1.0))
+			#rospy.loginfo("after lookup")
+			#rospy.loginfo(self._transform)
 		except Exception as e:
 			Logger.logwarn('Could not transform pose: ' + str(e))
 		 	self._failed = True
@@ -144,7 +129,7 @@ class GetObjectPoseState(EventState):
 		# This method is called when the behavior is started.
 		# If possible, it is generally better to initialize used resources in the constructor
 		# because if anything failed, the behavior would not even be started.
-		self._start_time = rospy.Time.now()
+		pass # Nothing to do
 
 	def on_stop(self):
 		# This method is called whenever the behavior stops execution, also if it is cancelled.
