@@ -4,17 +4,33 @@
 	<arg name="order_config" default="assignment_order.yaml"/>
 	<arg name="sensor_config" default="assignment_sensor_config.yaml"/>
 
-	<include file = "$(find ur10_moveit_config)/launch/move_group.launch">
-	 	<arg name = "arm_namespace" value="/ariac/arm1"/>
-	</include>
+	<arg name="verbose" default="false" />
+	<arg unless="$(arg verbose)" name="verbose_args" value="" />
+	<arg     if="$(arg verbose)" name="verbose_args" value="--verbose" />
 
-	<include file = "$(find ur10_moveit_config)/launch/move_group.launch">
-	 	<arg name = "arm_namespace" value="/ariac/arm2"/>
-	</include>
+	<arg name="state_logging" default="false" />
+	<arg unless="$(arg state_logging)" name="state_logging_args" value="" />
+	<arg     if="$(arg state_logging)" name="state_logging_args" value="--state-logging=true" />
 
-	<!-- Start the opdracht-->
-	<node name="osrf_gear" pkg="osrf_gear" type="gear.py" args="-f $(find assignment)/config/orders/$(arg order_config) $(find assignment)/config/sensors/$(arg sensor_config) --development-mode --verbose"
-	output="screen"/>
+	<arg name="no_gui" default="false" />
+	<arg unless="$(arg no_gui)" name="gui_args" value="" />
+	<arg     if="$(arg no_gui)" name="gui_args" value="--no-gui" />
+
+	<arg name="fill_demo_shipment" default="false" />
+	<arg unless="$(arg fill_demo_shipment)" name="fill_demo_shipment_args" value="" />
+	<arg     if="$(arg fill_demo_shipment)" name="fill_demo_shipment_args" value="--fill-demo-shipment" />
+
+	<node name="ariac_sim" pkg="osrf_gear" type="gear.py"
+		args="--development-mode
+		  $(arg verbose_args)
+		  $(arg state_logging_args)
+		  $(arg gui_args)
+		  $(arg fill_demo_shipment_args)
+		  --visualize-sensor-views
+		  -f $(find assignment)/config/orders/$(arg order_config)
+		  $(find assignment)/config/sensors/$(arg sensor_config)
+		  " required="true" output="screen" />
+
 
 
 
