@@ -9,7 +9,7 @@ class UseGripper(EventState):
 	'''	Opening or closing the gripper of robot1 or robot2
 	-- enable		bool		If 'true' the gripper is opened		
 	#> arm_id		string		Which robot is used
-	<= continue				The gripper is in its desired state
+	<= succes				The gripper is in its desired state
 	<= failed				The gripper did not get to its desired state after a certain amount of time
 	<= invalid_arm				Invalid arm id
 	'''
@@ -31,7 +31,7 @@ class UseGripper(EventState):
 			gripper_service = '/ariac/arm1/gripper/control'
 		else:
 			if userdata.arm_id == 'arm2':
-				gripper_service = '/ariac/arm1/gripper/control'
+				gripper_service = '/ariac/arm2/gripper/control'
 			else:
 				return 'invalid_arm'
 
@@ -49,7 +49,7 @@ class UseGripper(EventState):
 			rospy.loginfo("I only got here AFTER the service call was completed!")
 
 			if service_response.succes == True:
-				return 'continue'
+				return 'succes'
 			else:
 				return 'failed'
 		
