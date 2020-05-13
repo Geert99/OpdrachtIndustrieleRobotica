@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<behavior name="RobotSelectorState">
+
+	<executable package_path="ariac_flexbe_behaviors.robotselectorstate_sm" class="RobotSelectorStateSM" />
+	<tagstring></tagstring>
+	<author>Geert</author>
+	<date>Wed May 13 2020</date>
+	<description>
+		Met deze state wordt de juiste robot gekozen
+	</description>
+
+
+	<!-- Contained Behaviors -->
+
+	<!-- Available Parameters -->
+
+</behavior>
