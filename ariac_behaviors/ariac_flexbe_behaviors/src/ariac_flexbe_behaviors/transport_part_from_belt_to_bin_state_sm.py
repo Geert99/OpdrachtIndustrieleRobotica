@@ -10,7 +10,7 @@
 from flexbe_core import Behavior, Autonomy, OperatableStateMachine, ConcurrencyContainer, PriorityContainer, Logger
 from ariac_flexbe_states.set_conveyorbelt_power_state import SetConveyorbeltPowerState
 from flexbe_states.wait_state import WaitState
-from ariac_flexbe_states.detect_part_camera_ariac_state import DetectPartCameraAriacState
+from ariac_flexbe_states.detect_first_part_camera_ariac_state import DetectFirstPartCameraAriacState
 # Additional imports can be added inside the following tags
 # [MANUAL_IMPORT]
 
@@ -50,7 +50,7 @@ class transport_part_from_belt_to_bin_stateSM(Behavior):
 		_state_machine.userdata.arm = ''
 		_state_machine.userdata.power = 100
 		_state_machine.userdata.NoPower = 0
-		_state_machine.userdata.part1 = 'pulley_part'
+		_state_machine.userdata.part1 = 'disk_part'
 		_state_machine.userdata.ref_frame1 = 'arm1_linear_arm_actuator'
 		_state_machine.userdata.Camera1_topic = '/ariac/Camera_Converyor_Links'
 		_state_machine.userdata.camera_frame1 = 'Camera_Converyor_Links_frame'
@@ -76,99 +76,37 @@ class transport_part_from_belt_to_bin_stateSM(Behavior):
 										autonomy={'continue': Autonomy.Off, 'fail': Autonomy.Off},
 										remapping={'power': 'power'})
 
-			# x:343 y:118
-			OperatableStateMachine.add('Stopconveyor',
-										SetConveyorbeltPowerState(),
-										transitions={'continue': 'WAIT_completed', 'fail': 'WAIT_failed'},
-										autonomy={'continue': Autonomy.Off, 'fail': Autonomy.Off},
-										remapping={'power': 'NoPower'})
-
 			# x:1053 y:645
 			OperatableStateMachine.add('WAIT_completed',
 										WaitState(wait_time=5),
 										transitions={'done': 'finished'},
 										autonomy={'done': Autonomy.Off})
 
-			# x:128 y:104
-			OperatableStateMachine.add('CheckPart1',
-										DetectPartCameraAriacState(time_out=2),
-										transitions={'continue': 'Stopconveyor', 'failed': 'WAIT_failed', 'not_found': 'CheckPart2'},
-										autonomy={'continue': Autonomy.Off, 'failed': Autonomy.Off, 'not_found': Autonomy.Off},
-										remapping={'ref_frame': 'ref_frame1', 'camera_topic': 'Camera1_topic', 'camera_frame': 'camera_frame1', 'part': 'part1', 'pose': 'pose'})
-
-			# x:339 y:267
-			OperatableStateMachine.add('StartConveryor_2',
-										SetConveyorbeltPowerState(),
-										transitions={'continue': 'WWait_check2', 'fail': 'WAIT_failed'},
-										autonomy={'continue': Autonomy.Off, 'fail': Autonomy.Off},
-										remapping={'power': 'power'})
-
-			# x:678 y:403
+			# x:663 y:31
 			OperatableStateMachine.add('Stopconveyor_2',
 										SetConveyorbeltPowerState(),
 										transitions={'continue': 'WAIT_completed', 'fail': 'WAIT_failed'},
 										autonomy={'continue': Autonomy.Off, 'fail': Autonomy.Off},
 										remapping={'power': 'NoPower'})
 
-			# x:896 y:33
+			# x:1106 y:35
 			OperatableStateMachine.add('WAIT_failed',
 										WaitState(wait_time=5),
-										transitions={'done': 'Stopconveyor_3'},
+										transitions={'done': 'failed'},
 										autonomy={'done': Autonomy.Off})
 
-			# x:3 y:88
+			# x:298 y:163
 			OperatableStateMachine.add('WAIT_check',
 										WaitState(wait_time=2),
-										transitions={'done': 'CheckPart1'},
+										transitions={'done': 'CheckforDisk'},
 										autonomy={'done': Autonomy.Off})
 
-			# x:130 y:166
-			OperatableStateMachine.add('CheckPart2',
-										DetectPartCameraAriacState(time_out=2),
-										transitions={'continue': 'Stopconveyor', 'failed': 'WAIT_failed', 'not_found': 'CheckPart3'},
+			# x:441 y:35
+			OperatableStateMachine.add('CheckforDisk',
+										DetectFirstPartCameraAriacState(part_list=['disk_part'], time_out=2),
+										transitions={'continue': 'Stopconveyor_2', 'failed': 'WAIT_failed', 'not_found': 'WAIT_check'},
 										autonomy={'continue': Autonomy.Off, 'failed': Autonomy.Off, 'not_found': Autonomy.Off},
-										remapping={'ref_frame': 'ref_frame1', 'camera_topic': 'Camera1_topic', 'camera_frame': 'camera_frame1', 'part': 'part2', 'pose': 'pose'})
-
-			# x:130 y:228
-			OperatableStateMachine.add('CheckPart3',
-										DetectPartCameraAriacState(time_out=2),
-										transitions={'continue': 'StartConveryor_2', 'failed': 'WAIT_failed', 'not_found': 'CheckPart4'},
-										autonomy={'continue': Autonomy.Off, 'failed': Autonomy.Off, 'not_found': Autonomy.Off},
-										remapping={'ref_frame': 'ref_frame1', 'camera_topic': 'Camera1_topic', 'camera_frame': 'camera_frame1', 'part': 'part3', 'pose': 'pose'})
-
-			# x:130 y:305
-			OperatableStateMachine.add('CheckPart4',
-										DetectPartCameraAriacState(time_out=2),
-										transitions={'continue': 'StartConveryor_2', 'failed': 'WAIT_failed', 'not_found': 'WAIT_check'},
-										autonomy={'continue': Autonomy.Off, 'failed': Autonomy.Off, 'not_found': Autonomy.Off},
-										remapping={'ref_frame': 'ref_frame1', 'camera_topic': 'Camera1_topic', 'camera_frame': 'camera_frame1', 'part': 'part2', 'pose': 'pose'})
-
-			# x:341 y:390
-			OperatableStateMachine.add('CheckPart3_2',
-										DetectPartCameraAriacState(time_out=2),
-										transitions={'continue': 'Stopconveyor_2', 'failed': 'WAIT_failed', 'not_found': 'CheckPart4_2'},
-										autonomy={'continue': Autonomy.Off, 'failed': Autonomy.Off, 'not_found': Autonomy.Off},
-										remapping={'ref_frame': 'ref_frame1', 'camera_topic': 'Camera1_topic', 'camera_frame': 'camera_frame1', 'part': 'part3', 'pose': 'pose'})
-
-			# x:341 y:479
-			OperatableStateMachine.add('CheckPart4_2',
-										DetectPartCameraAriacState(time_out=2),
-										transitions={'continue': 'Stopconveyor_2', 'failed': 'WAIT_failed', 'not_found': 'WWait_check2'},
-										autonomy={'continue': Autonomy.Off, 'failed': Autonomy.Off, 'not_found': Autonomy.Off},
-										remapping={'ref_frame': 'ref_frame1', 'camera_topic': 'Camera1_topic', 'camera_frame': 'camera_frame1', 'part': 'part4', 'pose': 'pose'})
-
-			# x:342 y:330
-			OperatableStateMachine.add('WWait_check2',
-										WaitState(wait_time=2),
-										transitions={'done': 'CheckPart3_2'},
-										autonomy={'done': Autonomy.Off})
-
-			# x:1021 y:34
-			OperatableStateMachine.add('Stopconveyor_3',
-										SetConveyorbeltPowerState(),
-										transitions={'continue': 'failed', 'fail': 'failed'},
-										autonomy={'continue': Autonomy.Off, 'fail': Autonomy.Off},
-										remapping={'power': 'NoPower'})
+										remapping={'ref_frame': 'ref_frame1', 'camera_topic': 'Camera1_topic', 'camera_frame': 'camera_frame1', 'part': 'part', 'pose': 'pose'})
 
 
 		return _state_machine
