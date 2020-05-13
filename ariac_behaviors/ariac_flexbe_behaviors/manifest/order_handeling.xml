@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<behavior name="order_handeling">
+
+	<executable package_path="ariac_flexbe_behaviors.order_handeling_sm" class="order_handelingSM" />
+	<tagstring>ariac</tagstring>
+	<author>Geert en Stijn</author>
+	<date>Wed May 13 2020</date>
+	<description>
+		dit is een behaivor voor het handelen van orders
+	</description>
+
+
+	<!-- Contained Behaviors -->
+	<contains name="transport_part_form_bin_to_agv_state" />
+
+	<!-- Available Parameters -->
+
+</behavior>
