@@ -59,6 +59,7 @@ class transport_part_from_bin_to_agv_1SM(Behavior):
 		_state_machine.userdata.action_topic = '/move_group'
 		_state_machine.userdata.config_name_R1PreBin1 = 'R1PreBin1'
 		_state_machine.userdata.robot_name = ''
+		_state_machine.userdata.part = 'gasket_part'
 
 		# Additional creation code can be added inside the following tags
 		# [MANUAL_CREATE]
@@ -84,7 +85,7 @@ class transport_part_from_bin_to_agv_1SM(Behavior):
 										self.use_behavior(transport_part_form_bin_to_agv_stateSM, 'transport_part_form_bin_to_agv_state'),
 										transitions={'finished': 'EndAssignment', 'failed': 'failed'},
 										autonomy={'finished': Autonomy.Inherit, 'failed': Autonomy.Inherit},
-										remapping={'part_type': 'part_type', 'agv_id': 'agv_id', 'pose_on_agv': 'pose_on_agv'})
+										remapping={'part_type': 'part_type', 'agv_id': 'agv_id', 'pose_on_agv': 'pose_on_agv', 'pose': 'pose'})
 
 
 		return _state_machine
