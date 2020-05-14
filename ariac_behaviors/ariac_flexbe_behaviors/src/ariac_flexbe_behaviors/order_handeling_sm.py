@@ -16,7 +16,7 @@ from ariac_logistics_flexbe_states.get_part_from_products_state import GetPartFr
 from ariac_support_flexbe_states.add_numeric_state import AddNumericState
 from ariac_support_flexbe_states.equal_state import EqualState
 from ariac_support_flexbe_states.replace_state import ReplaceState
-from ariac_flexbe_states.end_assignment_state import EndAssignment
+from ariac_flexbe_behaviors.notify_shipment_ready_sm import notify_shipment_readySM
 # Additional imports can be added inside the following tags
 # [MANUAL_IMPORT]
 
@@ -41,6 +41,7 @@ class order_handelingSM(Behavior):
 
 		# references to used behaviors
 		self.add_behavior(transport_part_form_bin_to_agv_stateSM, 'transport_part_form_bin_to_agv_state')
+		self.add_behavior(notify_shipment_readySM, 'notify_shipment_ready')
 
 		# Additional initialization code can be added inside the following tags
 		# [MANUAL_INIT]
@@ -52,7 +53,7 @@ class order_handelingSM(Behavior):
 
 
 	def create(self):
-		# x:1444 y:130, x:130 y:365
+		# x:867 y:12, x:483 y:355
 		_state_machine = OperatableStateMachine(outcomes=['finished', 'failed'])
 		_state_machine.userdata.order_id = ''
 		_state_machine.userdata.shipments = []
@@ -68,6 +69,7 @@ class order_handelingSM(Behavior):
 		_state_machine.userdata.increment = 1
 		_state_machine.userdata.Null = 0
 		_state_machine.userdata.pose_on_agv = []
+		_state_machine.userdata.old_order_id = ''
 
 		# Additional creation code can be added inside the following tags
 		# [MANUAL_CREATE]
@@ -85,7 +87,7 @@ class order_handelingSM(Behavior):
 			# x:207 y:119
 			OperatableStateMachine.add('get_order',
 										GetOrderState(),
-										transitions={'continue': 'getProductsfromshipment'},
+										transitions={'continue': 'TestLastOrder'},
 										autonomy={'continue': Autonomy.Off},
 										remapping={'order_id': 'order_id', 'shipments': 'shipments', 'number_of_shipments': 'number_of_shipments'})
 
@@ -101,7 +103,7 @@ class order_handelingSM(Behavior):
 										self.use_behavior(transport_part_form_bin_to_agv_stateSM, 'transport_part_form_bin_to_agv_state'),
 										transitions={'finished': 'IncreaseProductIndex', 'failed': 'failed'},
 										autonomy={'finished': Autonomy.Inherit, 'failed': Autonomy.Inherit},
-										remapping={'part_type': 'part_type', 'agv_id': 'agv_id', 'pose_on_agv': 'pose_on_agv'})
+										remapping={'part_type': 'part_type', 'agv_id': 'agv_id', 'part_pose': 'part_pose', 'pose': 'pose'})
 
 			# x:649 y:120
 			OperatableStateMachine.add('GetPartinfo',
@@ -110,53 +112,60 @@ class order_handelingSM(Behavior):
 										autonomy={'continue': Autonomy.Off, 'invalid_index': Autonomy.Off},
 										remapping={'products': 'products', 'index': 'product_index', 'type': 'part_type', 'pose': 'part_pose'})
 
-			# x:930 y:194
+			# x:928 y:241
 			OperatableStateMachine.add('IncreaseProductIndex',
 										AddNumericState(),
 										transitions={'done': 'CheckProduct_index'},
 										autonomy={'done': Autonomy.Off},
 										remapping={'value_a': 'product_index', 'value_b': 'increment', 'result': 'product_index'})
 
-			# x:932 y:255
+			# x:934 y:323
 			OperatableStateMachine.add('CheckProduct_index',
 										EqualState(),
-										transitions={'true': 'SETnull', 'false': 'IncreaseProductIndex'},
+										transitions={'true': 'SETnull', 'false': 'GetPartinfo'},
 										autonomy={'true': Autonomy.Off, 'false': Autonomy.Off},
 										remapping={'value_a': 'product_index', 'value_b': 'number_of_products'})
 
-			# x:932 y:382
+			# x:770 y:514
 			OperatableStateMachine.add('IncreaseShipmentIndex',
 										AddNumericState(),
 										transitions={'done': 'Checkshipmentindex'},
 										autonomy={'done': Autonomy.Off},
 										remapping={'value_a': 'shipment_index', 'value_b': 'increment', 'result': 'shipment_index'})
 
-			# x:933 y:444
+			# x:396 y:499
 			OperatableStateMachine.add('Checkshipmentindex',
 										EqualState(),
-										transitions={'true': 'SETnull_2', 'false': 'getProductsfromshipment'},
+										transitions={'true': 'get_order', 'false': 'notify_shipment_ready'},
 										autonomy={'true': Autonomy.Off, 'false': Autonomy.Off},
 										remapping={'value_a': 'number_of_shipments', 'value_b': 'shipment_index'})
 
-			# x:931 y:314
+			# x:990 y:433
 			OperatableStateMachine.add('SETnull',
 										ReplaceState(),
 										transitions={'done': 'IncreaseShipmentIndex'},
 										autonomy={'done': Autonomy.Off},
 										remapping={'value': 'Null', 'result': 'product_index'})
 
-			# x:934 y:503
-			OperatableStateMachine.add('SETnull_2',
-										ReplaceState(),
-										transitions={'done': 'EndAssignment'},
-										autonomy={'done': Autonomy.Off},
-										remapping={'value': 'Null', 'result': 'shipment_index'})
+			# x:644 y:375
+			OperatableStateMachine.add('notify_shipment_ready',
+										self.use_behavior(notify_shipment_readySM, 'notify_shipment_ready'),
+										transitions={'finished': 'getProductsfromshipment', 'failed': 'failed'},
+										autonomy={'finished': Autonomy.Inherit, 'failed': Autonomy.Inherit})
 
-			# x:1194 y:160
-			OperatableStateMachine.add('EndAssignment',
-										EndAssignment(),
-										transitions={'continue': 'finished'},
-										autonomy={'continue': Autonomy.Off})
+			# x:388 y:13
+			OperatableStateMachine.add('TestLastOrder',
+										EqualState(),
+										transitions={'true': 'finished', 'false': 'RememberOldOrder'},
+										autonomy={'true': Autonomy.Off, 'false': Autonomy.Off},
+										remapping={'value_a': 'order_id', 'value_b': 'old_order_id'})
+
+			# x:632 y:44
+			OperatableStateMachine.add('RememberOldOrder',
+										ReplaceState(),
+										transitions={'done': 'getProductsfromshipment'},
+										autonomy={'done': Autonomy.Off},
+										remapping={'value': 'old_order_id', 'result': 'order_id'})
 
 
 		return _state_machine

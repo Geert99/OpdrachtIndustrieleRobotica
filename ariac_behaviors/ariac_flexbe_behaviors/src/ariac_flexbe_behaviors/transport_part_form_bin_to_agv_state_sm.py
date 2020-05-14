@@ -8,7 +8,6 @@
 ###########################################################
 
 from flexbe_core import Behavior, Autonomy, OperatableStateMachine, ConcurrencyContainer, PriorityContainer, Logger
-from ariac_logistics_flexbe_states.get_material_locations import GetMaterialLocationsState
 from ariac_flexbe_states.message_state import MessageState
 from ariac_flexbe_states.srdf_state_to_moveit_ariac_state import SrdfStateToMoveitAriac
 from ariac_flexbe_states.use_gripper import UseGripper
@@ -17,7 +16,9 @@ from ariac_flexbe_states.compute_grasp_ariac_state import ComputeGraspAriacState
 from ariac_flexbe_states.moveit_to_joints_dyn_ariac_state import MoveitToJointsDynAriacState
 from flexbe_states.wait_state import WaitState
 from ariac_flexbe_states.get_object_pose import GetObjectPoseState
-from ariac_support_flexbe_states.get_item_from_list_state import GetItemFromListState
+from ariac_support_flexbe_states.equal_state import EqualState
+from ariac_flexbe_states.compute_grasp_part_offset_ariac_state import ComputeGraspPartOffsetAriacState
+from ariac_support_flexbe_states.replace_state import ReplaceState
 # Additional imports can be added inside the following tags
 # [MANUAL_IMPORT]
 
@@ -52,11 +53,8 @@ class transport_part_form_bin_to_agv_stateSM(Behavior):
 
 
 	def create(self):
-		# x:50 y:436, x:669 y:461
-		_state_machine = OperatableStateMachine(outcomes=['finished', 'failed'], input_keys=['part_type', 'agv_id', 'pose_on_agv'], output_keys=['pose'])
-		_state_machine.userdata.part_type = ''
-		_state_machine.userdata.agv_id = ''
-		_state_machine.userdata.pose_on_agv = []
+		# x:21 y:584, x:938 y:468
+		_state_machine = OperatableStateMachine(outcomes=['finished', 'failed'], input_keys=['part_type', 'agv_id', 'part_pose'], output_keys=['pose'])
 		_state_machine.userdata.arm_id = 'arm1'
 		_state_machine.userdata.agv_id = 'agv1'
 		_state_machine.userdata.joint_values = []
@@ -68,11 +66,11 @@ class transport_part_form_bin_to_agv_stateSM(Behavior):
 		_state_machine.userdata.config_name_R1PreBin1 = 'R1PreBin1'
 		_state_machine.userdata.robot_name = ''
 		_state_machine.userdata.srdf_param = 'ur10.srdf'
-		_state_machine.userdata.ref_frame = 'arm1_linear_arm_actuator'
-		_state_machine.userdata.camera_frame = 'Camera_Bin_1_frame'
-		_state_machine.userdata.camera_topic = '/ariac/Camera_Bin_1'
-		_state_machine.userdata.pose = ''
-		_state_machine.userdata.part = 'gasket_part'
+		_state_machine.userdata.ref_frame1 = 'arm1_linear_arm_actuator'
+		_state_machine.userdata.camera_frame = ''
+		_state_machine.userdata.camera_topic = ''
+		_state_machine.userdata.pose = []
+		_state_machine.userdata.part = ''
 		_state_machine.userdata.tool_link = 'ee_link'
 		_state_machine.userdata.part_offset = 0.035
 		_state_machine.userdata.part_rotation = 0
@@ -82,6 +80,29 @@ class transport_part_form_bin_to_agv_stateSM(Behavior):
 		_state_machine.userdata.material_locations = []
 		_state_machine.userdata.bin_location = ''
 		_state_machine.userdata.zero_value = ''
+		_state_machine.userdata.part_pose = []
+		_state_machine.userdata.part_type = ''
+		_state_machine.userdata.ref_frame2 = 'arm2_linear_arm_actuator'
+		_state_machine.userdata.agv1 = 'agv1'
+		_state_machine.userdata.agv2 = 'agv2'
+		_state_machine.userdata.camera_topic2 = '/ariac/Camera_Bin_2'
+		_state_machine.userdata.camera_topic3 = '/ariac/Camera_Bin_3'
+		_state_machine.userdata.camera_topic5 = '/ariac/Camera_Bin_5'
+		_state_machine.userdata.camera_topic4 = '/ariac/Camera_Bin_4'
+		_state_machine.userdata.camera_topic6 = '/ariac/Camera_Bin_6'
+		_state_machine.userdata.camera_topic1 = '/ariac/Camera_Bin_1'
+		_state_machine.userdata.ref_frame = ''
+		_state_machine.userdata.camera_frame5 = 'Camera_Bin_5_frame'
+		_state_machine.userdata.camera_frame4 = 'Camera_Bin_4_frame'
+		_state_machine.userdata.camera_frame3 = 'Camera_Bin_3_frame'
+		_state_machine.userdata.camera_frame2 = 'Camera_Bin_2_frame'
+		_state_machine.userdata.camera_frame1 = 'Camera_Bin_1_frame'
+		_state_machine.userdata.camera_frame6 = 'Camera_Bin_6_frame'
+		_state_machine.userdata.part1 = 'gasket_part'
+		_state_machine.userdata.part2 = 'pulley_part'
+		_state_machine.userdata.part3 = 'piston_rod_part'
+		_state_machine.userdata.part4 = 'gear_part'
+		_state_machine.userdata.rotation = 0
 
 		# Additional creation code can be added inside the following tags
 		# [MANUAL_CREATE]
@@ -90,19 +111,12 @@ class transport_part_form_bin_to_agv_stateSM(Behavior):
 
 
 		with _state_machine:
-			# x:71 y:40
-			OperatableStateMachine.add('GetPartLocation',
-										GetMaterialLocationsState(),
-										transitions={'continue': 'GetBinLocation'},
-										autonomy={'continue': Autonomy.Off},
-										remapping={'part': 'part_type', 'material_locations': 'material_locations'})
-
-			# x:834 y:33
-			OperatableStateMachine.add('MoseMessage',
+			# x:468 y:36
+			OperatableStateMachine.add('AgvIdMessage',
 										MessageState(),
-										transitions={'continue': 'CheckPosePartsinBIn'},
+										transitions={'continue': 'PartTypeMessage'},
 										autonomy={'continue': Autonomy.Off},
-										remapping={'message': 'pose_on_agv'})
+										remapping={'message': 'agv_id'})
 
 			# x:648 y:35
 			OperatableStateMachine.add('PartTypeMessage',
@@ -111,7 +125,7 @@ class transport_part_form_bin_to_agv_stateSM(Behavior):
 										autonomy={'continue': Autonomy.Off},
 										remapping={'message': 'part_type'})
 
-			# x:438 y:162
+			# x:460 y:161
 			OperatableStateMachine.add('R1PreGrasp1',
 										SrdfStateToMoveitAriac(),
 										transitions={'reached': 'OpenGripper', 'planning_failed': 'failed', 'control_failed': 'failed', 'param_error': 'failed'},
@@ -125,10 +139,10 @@ class transport_part_form_bin_to_agv_stateSM(Behavior):
 										autonomy={'continue': Autonomy.Off, 'failed': Autonomy.Off, 'invalid_arm': Autonomy.Off},
 										remapping={'arm_id': 'arm_id'})
 
-			# x:54 y:161
+			# x:235 y:96
 			OperatableStateMachine.add('CheckPosePartsinBIn',
 										DetectPartCameraAriacState(time_out=2),
-										transitions={'continue': 'R1PreGrasp1', 'failed': 'failed', 'not_found': 'failed'},
+										transitions={'continue': 'R1PreGrasp1', 'failed': 'retry', 'not_found': 'retry'},
 										autonomy={'continue': Autonomy.Off, 'failed': Autonomy.Off, 'not_found': Autonomy.Off},
 										remapping={'ref_frame': 'ref_frame', 'camera_topic': 'camera_topic', 'camera_frame': 'camera_frame', 'part': 'part', 'pose': 'pose'})
 
@@ -163,7 +177,7 @@ class transport_part_form_bin_to_agv_stateSM(Behavior):
 			# x:1329 y:548
 			OperatableStateMachine.add('R1PreAGV1',
 										SrdfStateToMoveitAriac(),
-										transitions={'reached': 'ComputePlace', 'planning_failed': 'failed', 'control_failed': 'failed', 'param_error': 'failed'},
+										transitions={'reached': 'ComputePlacePose', 'planning_failed': 'failed', 'control_failed': 'failed', 'param_error': 'failed'},
 										autonomy={'reached': Autonomy.Off, 'planning_failed': Autonomy.Off, 'control_failed': Autonomy.Off, 'param_error': Autonomy.Off},
 										remapping={'config_name': 'config_name_R1PreAGV1', 'move_group': 'move_group', 'move_group_prefix': 'move_group_prefix', 'action_topic': 'action_topic', 'robot_name': 'robot_name', 'config_name_out': 'config_name_out', 'move_group_out': 'move_group_out', 'robot_name_out': 'robot_name_out', 'action_topic_out': 'action_topic_out', 'joint_values': 'joint_values', 'joint_names': 'joint_names'})
 
@@ -172,13 +186,6 @@ class transport_part_form_bin_to_agv_stateSM(Behavior):
 										WaitState(wait_time=1),
 										transitions={'done': 'R1PreGrasp1Back'},
 										autonomy={'done': Autonomy.Off})
-
-			# x:1254 y:718
-			OperatableStateMachine.add('ComputePlace',
-										ComputeGraspAriacState(joint_names=['linear_arm_actuator_joint', 'shoulder_pan_joint', 'shoulder_lift_joint', 'elbow_joint', 'wrist_1_joint', 'wrist_2_joint', 'wrist_3_joint']),
-										transitions={'continue': 'R1ToPlace', 'failed': 'failed'},
-										autonomy={'continue': Autonomy.Off, 'failed': Autonomy.Off},
-										remapping={'move_group': 'move_group', 'move_group_prefix': 'move_group_prefix', 'tool_link': 'tool_link', 'pose': 'agv_pose', 'offset': 'place_offset', 'rotation': 'part_rotation', 'joint_values': 'joint_values', 'joint_names': 'joint_names'})
 
 			# x:986 y:718
 			OperatableStateMachine.add('R1ToPlace',
@@ -214,25 +221,136 @@ class transport_part_form_bin_to_agv_stateSM(Behavior):
 										autonomy={'continue': Autonomy.Off, 'failed': Autonomy.Off},
 										remapping={'pose': 'agv_pose'})
 
-			# x:1019 y:593
+			# x:951 y:616
 			OperatableStateMachine.add('Retry',
 										WaitState(wait_time=0.1),
 										transitions={'done': 'R1ToPlace'},
 										autonomy={'done': Autonomy.Off})
 
-			# x:277 y:27
-			OperatableStateMachine.add('GetBinLocation',
-										GetItemFromListState(),
-										transitions={'done': 'AgvIdMessage', 'invalid_index': 'failed'},
-										autonomy={'done': Autonomy.Off, 'invalid_index': Autonomy.Off},
-										remapping={'list': 'material_locations', 'index': 'zero_value', 'item': 'bin_location'})
-
-			# x:468 y:36
-			OperatableStateMachine.add('AgvIdMessage',
+			# x:834 y:33
+			OperatableStateMachine.add('MoseMessage',
 										MessageState(),
-										transitions={'continue': 'PartTypeMessage'},
+										transitions={'continue': 'WelkeAGV?'},
 										autonomy={'continue': Autonomy.Off},
-										remapping={'message': 'agv_id'})
+										remapping={'message': 'part_pose'})
+
+			# x:36 y:256
+			OperatableStateMachine.add('Gasket?',
+										EqualState(),
+										transitions={'true': 'ReplaceRef1', 'false': 'Pulley?'},
+										autonomy={'true': Autonomy.Off, 'false': Autonomy.Off},
+										remapping={'value_a': 'part_type', 'value_b': 'part1'})
+
+			# x:30 y:444
+			OperatableStateMachine.add('Pulley?',
+										EqualState(),
+										transitions={'true': 'ReplaceRef_2', 'false': 'failed'},
+										autonomy={'true': Autonomy.Off, 'false': Autonomy.Off},
+										remapping={'value_a': 'part_type', 'value_b': 'part2'})
+
+			# x:1252 y:694
+			OperatableStateMachine.add('ComputePlacePose',
+										ComputeGraspPartOffsetAriacState(joint_names=['linear_arm_actuator_joint', 'shoulder_pan_joint', 'shoulder_lift_joint', 'elbow_joint', 'wrist_1_joint', 'wrist_2_joint', 'wrist_3_joint']),
+										transitions={'continue': 'R1ToPlace', 'failed': 'failed'},
+										autonomy={'continue': Autonomy.Off, 'failed': Autonomy.Off},
+										remapping={'move_group': 'move_group', 'move_group_prefix': 'move_group_prefix', 'tool_link': 'tool_link', 'pose': 'agv_pose', 'offset': 'offset', 'rotation': 'rotation', 'part_pose': 'part_pose', 'joint_values': 'joint_values', 'joint_names': 'joint_names'})
+
+			# x:14 y:90
+			OperatableStateMachine.add('WelkeAGV?',
+										EqualState(),
+										transitions={'true': 'Gasket?', 'false': 'failed'},
+										autonomy={'true': Autonomy.Off, 'false': Autonomy.Off},
+										remapping={'value_a': 'agv_id', 'value_b': 'agv1'})
+
+			# x:138 y:370
+			OperatableStateMachine.add('ReplaceRef1',
+										ReplaceState(),
+										transitions={'done': 'ReplaceTopic1'},
+										autonomy={'done': Autonomy.Off},
+										remapping={'value': 'ref_frame1', 'result': 'ref_frame'})
+
+			# x:28 y:524
+			OperatableStateMachine.add('ReplaceRef_2',
+										ReplaceState(),
+										transitions={'done': 'ReplaceTopic2'},
+										autonomy={'done': Autonomy.Off},
+										remapping={'value': 'ref_frame2', 'result': 'ref_frame'})
+
+			# x:198 y:591
+			OperatableStateMachine.add('ReplaceTopic2',
+										ReplaceState(),
+										transitions={'done': 'ReplaceFrame2'},
+										autonomy={'done': Autonomy.Off},
+										remapping={'value': 'camera_topic2', 'result': 'camera_topic'})
+
+			# x:399 y:379
+			OperatableStateMachine.add('ReplaceTopic1',
+										ReplaceState(),
+										transitions={'done': 'ReplaceFrame1'},
+										autonomy={'done': Autonomy.Off},
+										remapping={'value': 'camera_topic1', 'result': 'camera_topic'})
+
+			# x:212 y:497
+			OperatableStateMachine.add('ReplaceFrame2',
+										ReplaceState(),
+										transitions={'done': 'ReplacePart2'},
+										autonomy={'done': Autonomy.Off},
+										remapping={'value': 'camera_frame2', 'result': 'camera_frame'})
+
+			# x:357 y:312
+			OperatableStateMachine.add('ReplaceFrame1',
+										ReplaceState(),
+										transitions={'done': 'ReplacePart1'},
+										autonomy={'done': Autonomy.Off},
+										remapping={'value': 'camera_frame1', 'result': 'camera_frame'})
+
+			# x:224 y:202
+			OperatableStateMachine.add('ReplacePart1',
+										ReplaceState(),
+										transitions={'done': 'RefMSG'},
+										autonomy={'done': Autonomy.Off},
+										remapping={'value': 'part1', 'result': 'part'})
+
+			# x:435 y:499
+			OperatableStateMachine.add('ReplacePart2',
+										ReplaceState(),
+										transitions={'done': 'CheckPosePartsinBIn'},
+										autonomy={'done': Autonomy.Off},
+										remapping={'value': 'part2', 'result': 'part'})
+
+			# x:266 y:9
+			OperatableStateMachine.add('retry',
+										WaitState(wait_time=0.5),
+										transitions={'done': 'CheckPosePartsinBIn'},
+										autonomy={'done': Autonomy.Off})
+
+			# x:468 y:98
+			OperatableStateMachine.add('RefMSG',
+										MessageState(),
+										transitions={'continue': 'TopicMSG'},
+										autonomy={'continue': Autonomy.Off},
+										remapping={'message': 'ref_frame'})
+
+			# x:648 y:97
+			OperatableStateMachine.add('TopicMSG',
+										MessageState(),
+										transitions={'continue': 'FrameMSG'},
+										autonomy={'continue': Autonomy.Off},
+										remapping={'message': 'camera_topic'})
+
+			# x:834 y:95
+			OperatableStateMachine.add('FrameMSG',
+										MessageState(),
+										transitions={'continue': 'FrameMSG_2'},
+										autonomy={'continue': Autonomy.Off},
+										remapping={'message': 'camera_frame'})
+
+			# x:974 y:92
+			OperatableStateMachine.add('FrameMSG_2',
+										MessageState(),
+										transitions={'continue': 'CheckPosePartsinBIn'},
+										autonomy={'continue': Autonomy.Off},
+										remapping={'message': 'part'})
 
 
 		return _state_machine

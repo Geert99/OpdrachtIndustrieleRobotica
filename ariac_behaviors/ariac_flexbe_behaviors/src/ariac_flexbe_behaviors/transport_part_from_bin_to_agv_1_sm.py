@@ -57,9 +57,7 @@ class transport_part_from_bin_to_agv_1SM(Behavior):
 		_state_machine.userdata.move_group = 'manipulator'
 		_state_machine.userdata.move_group_prefix = '/ariac/arm1'
 		_state_machine.userdata.action_topic = '/move_group'
-		_state_machine.userdata.config_name_R1PreBin1 = 'R1PreBin1'
 		_state_machine.userdata.robot_name = ''
-		_state_machine.userdata.part = 'gasket_part'
 
 		# Additional creation code can be added inside the following tags
 		# [MANUAL_CREATE]
