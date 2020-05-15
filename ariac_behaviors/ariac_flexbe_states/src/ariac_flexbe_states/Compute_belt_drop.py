@@ -156,9 +156,10 @@ class ComputeBeltDrop(EventState):
 				continue
 
 		# the grasp pose is defined as being located on top of the item
-		target_pose.pose.position.z += self._offset + 0.0
-		target_pose.pose.position.y += self._SideYoffset + 0.0
-		target_pose.pose.position.x += self._SideXoffset + 0.0
+		target_pose.pose.position.z += (self._offset + 0.03)
+		target_pose.pose.position.y += (self._SideYoffset + 3.32)
+		target_pose.pose.position.x += (self._SideXoffset - 0.75)
+		rospy.logwarn(target_pose)
 		# rotate the object pose 180 degrees around - now works with -90???
 
 		#q_orig = [target_pose.pose.orientation.x, target_pose.pose.orientation.y, target_pose.pose.orientation.z, target_pose.pose.orientation.w]
