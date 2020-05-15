@@ -156,14 +156,6 @@ class ComputeGraspPartOffsetAriacState(EventState):
 
 		# the grasp pose is defined as being located on top of the item
 		
-		userdata.part_pose.position.x
-		userdata.part_pose.position.y
-		userdata.part_pose.position.z
-		userdata.part_pose.orientation.x
-		userdata.part_pose.orientation.y
-		userdata.part_pose.orientation.z
-		userdata.part_pose.orientation.w
-
 		target_pose.pose.position.z += self._offset + 0.02
 		target_pose.pose.position.x += userdata.part_pose.position.x
 		target_pose.pose.position.y += userdata.part_pose.position.y
