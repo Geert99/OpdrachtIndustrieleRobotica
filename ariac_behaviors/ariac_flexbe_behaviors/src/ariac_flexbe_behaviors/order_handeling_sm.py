@@ -70,6 +70,7 @@ class order_handelingSM(Behavior):
 		_state_machine.userdata.Null = 0
 		_state_machine.userdata.pose_on_agv = []
 		_state_machine.userdata.old_order_id = ''
+		_state_machine.userdata.kit_tray = ''
 
 		# Additional creation code can be added inside the following tags
 		# [MANUAL_CREATE]

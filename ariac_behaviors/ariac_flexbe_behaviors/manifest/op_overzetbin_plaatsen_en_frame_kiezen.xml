@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<behavior name="op_overzetbin_plaatsen_en_frame_kiezen">
+
+	<executable package_path="ariac_flexbe_behaviors.op_overzetbin_plaatsen_en_frame_kiezen_sm" class="op_overzetbin_plaatsen_en_frame_kiezenSM" />
+	<tagstring>ariac</tagstring>
+	<author>Stijn en Geert</author>
+	<date>Fri May 15 2020</date>
+	<description>
+		Ervoor zorgen dat de part in de overzetbin geplaatst en een nieuwe camera gekozen wordt.
+	</description>
+
+
+	<!-- Contained Behaviors -->
+
+	<!-- Available Parameters -->
+
+</behavior>
