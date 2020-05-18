@@ -88,9 +88,9 @@ class CameraRobotSelectorSM(Behavior):
 		_state_machine.userdata.part2 = 'pulley_part'
 		_state_machine.userdata.part3 = 'piston_rod_part'
 		_state_machine.userdata.part4 = 'gear_part'
-		_state_machine.userdata.part_offset2 = 0.05
-		_state_machine.userdata.part_offset3 = 0.03
-		_state_machine.userdata.part_offset4 = 0.03
+		_state_machine.userdata.part_offset2 = 0.081
+		_state_machine.userdata.part_offset3 = 0.02
+		_state_machine.userdata.part_offset4 = 0.025
 		_state_machine.userdata.part_offset1 = 0.035
 		_state_machine.userdata.agv1_id = 'agv1'
 		_state_machine.userdata.agv2_id = 'agv2'

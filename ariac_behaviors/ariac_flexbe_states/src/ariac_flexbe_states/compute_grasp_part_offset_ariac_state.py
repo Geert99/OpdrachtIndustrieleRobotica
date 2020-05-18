@@ -170,9 +170,9 @@ class ComputeGraspPartOffsetAriacState(EventState):
 		#q_rot = quaternion_from_euler(math.pi/-2.0, 0, 0)
 		
 		res_q = quaternion_multiply(q_rot, q_orig)
-		res_q_b = quaternion_multiply(res_q, userdata.part_pose.orientation)
+		#res_q_b = quaternion_multiply(res_q, userdata.part_pose.orientation)
 		
-		target_pose.pose.orientation = geometry_msgs.msg.Quaternion(*res_q_b)
+		target_pose.pose.orientation = geometry_msgs.msg.Quaternion(*res_q) #_b
 
 		# use ik service to compute joint_values
 		self._srv_req = GetPositionIKRequest()

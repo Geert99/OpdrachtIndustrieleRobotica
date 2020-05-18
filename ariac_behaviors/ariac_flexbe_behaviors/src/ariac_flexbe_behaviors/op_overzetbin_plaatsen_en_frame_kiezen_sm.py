@@ -50,7 +50,7 @@ class op_overzetbin_plaatsen_en_frame_kiezenSM(Behavior):
 
 
 	def create(self):
-		# x:1723 y:19, x:652 y:144
+		# x:1723 y:19, x:585 y:171
 		_state_machine = OperatableStateMachine(outcomes=['finished', 'failed'], input_keys=['ref_frame', 'config_name', 'move_group_prefix', 'arm_id', 'agv_id', 'part_type'], output_keys=['move_group_prefix', 'config_name', 'arm_id', 'ref_frame', 'camera_topic', 'camera_frame', 'part_offset', 'overzet'])
 		_state_machine.userdata.ref_frame = ''
 		_state_machine.userdata.bin3_pose = ''
@@ -61,7 +61,7 @@ class op_overzetbin_plaatsen_en_frame_kiezenSM(Behavior):
 		_state_machine.userdata.robot_name = ''
 		_state_machine.userdata.tool_link = 'ee_link'
 		_state_machine.userdata.arm_id = ''
-		_state_machine.userdata.offset = 1
+		_state_machine.userdata.offset = 0.5
 		_state_machine.userdata.rotation = 0
 		_state_machine.userdata.agv_id = ''
 		_state_machine.userdata.agv1_id = 'agv1'
@@ -69,8 +69,8 @@ class op_overzetbin_plaatsen_en_frame_kiezenSM(Behavior):
 		_state_machine.userdata.part_offset = 0
 		_state_machine.userdata.partoffset1 = 0.035
 		_state_machine.userdata.partoffset2 = 0.081
-		_state_machine.userdata.partoffset3 = 0.035
-		_state_machine.userdata.partoffset4 = 0.020
+		_state_machine.userdata.partoffset3 = 0.02
+		_state_machine.userdata.partoffset4 = 0.025
 		_state_machine.userdata.part_type = ''
 		_state_machine.userdata.part1 = 'gasket_part'
 		_state_machine.userdata.part2 = 'pulley_part'
@@ -78,8 +78,8 @@ class op_overzetbin_plaatsen_en_frame_kiezenSM(Behavior):
 		_state_machine.userdata.part4 = 'gear_part'
 		_state_machine.userdata.move_group_prefix1 = '/ariac/arm1'
 		_state_machine.userdata.move_group_prefix2 = '/ariac/arm2'
-		_state_machine.userdata.config_namer1 = 'R1PreBin3'
-		_state_machine.userdata.config_namer2 = 'R2PreBin3'
+		_state_machine.userdata.config_namer1 = 'R1PreBin4'
+		_state_machine.userdata.config_namer2 = 'R2PreBin4'
 		_state_machine.userdata.arm1_id = 'arm1'
 		_state_machine.userdata.arm2_id = 'arm2'
 		_state_machine.userdata.camera_topic = ''
@@ -90,6 +90,8 @@ class op_overzetbin_plaatsen_en_frame_kiezenSM(Behavior):
 		_state_machine.userdata.overzetnee = 'nee'
 		_state_machine.userdata.ref_frame1 = 'arm1_linear_arm_actuator'
 		_state_machine.userdata.ref_frame2 = 'arm2_linear_arm_actuator'
+		_state_machine.userdata.config_name1 = 'R1PreBin1'
+		_state_machine.userdata.config_name4 = 'R2PreBin6'
 
 		# Additional creation code can be added inside the following tags
 		# [MANUAL_CREATE]
@@ -126,30 +128,30 @@ class op_overzetbin_plaatsen_en_frame_kiezenSM(Behavior):
 										autonomy={'reached': Autonomy.Off, 'planning_failed': Autonomy.Off, 'control_failed': Autonomy.Off},
 										remapping={'move_group_prefix': 'move_group_prefix', 'move_group': 'move_group', 'action_topic': 'action_topic', 'joint_values': 'joint_values', 'joint_names': 'joint_names'})
 
-			# x:833 y:182
+			# x:1142 y:173
 			OperatableStateMachine.add('OpengripperBin3',
 										UseGripper(enable=False),
 										transitions={'continue': 'WachtenGripper', 'failed': 'failed', 'invalid_arm': 'failed'},
 										autonomy={'continue': Autonomy.Off, 'failed': Autonomy.Off, 'invalid_arm': Autonomy.Off},
 										remapping={'arm_id': 'arm_id'})
 
-			# x:591 y:211
+			# x:984 y:236
 			OperatableStateMachine.add('WachtenGripper',
 										WaitState(wait_time=1),
 										transitions={'done': 'PreBin3Back'},
 										autonomy={'done': Autonomy.Off})
 
-			# x:271 y:252
+			# x:799 y:244
 			OperatableStateMachine.add('PreBin3Back',
 										SrdfStateToMoveitAriac(),
 										transitions={'reached': 'AGV?', 'planning_failed': 'failed', 'control_failed': 'failed', 'param_error': 'failed'},
 										autonomy={'reached': Autonomy.Off, 'planning_failed': Autonomy.Off, 'control_failed': Autonomy.Off, 'param_error': Autonomy.Off},
 										remapping={'config_name': 'config_name', 'move_group': 'move_group', 'move_group_prefix': 'move_group_prefix', 'action_topic': 'action_topic', 'robot_name': 'robot_name', 'config_name_out': 'config_name_out', 'move_group_out': 'move_group_out', 'robot_name_out': 'robot_name_out', 'action_topic_out': 'action_topic_out', 'joint_values': 'joint_values', 'joint_names': 'joint_names'})
 
-			# x:12 y:195
+			# x:16 y:99
 			OperatableStateMachine.add('AGV?',
 										EqualState(),
-										transitions={'true': 'gasket', 'false': 'gasket_2'},
+										transitions={'true': 'PreBin4', 'false': 'PreBin1'},
 										autonomy={'true': Autonomy.Off, 'false': Autonomy.Off},
 										remapping={'value_a': 'agv_id', 'value_b': 'agv1_id'})
 
@@ -179,7 +181,7 @@ class op_overzetbin_plaatsen_en_frame_kiezenSM(Behavior):
 										ReplaceState(),
 										transitions={'done': 'CameraFrame'},
 										autonomy={'done': Autonomy.Off},
-										remapping={'value': 'camera_topic', 'result': 'camera_topic4'})
+										remapping={'value': 'camera_topic4', 'result': 'camera_topic'})
 
 			# x:1644 y:217
 			OperatableStateMachine.add('CameraFrame',
@@ -195,7 +197,7 @@ class op_overzetbin_plaatsen_en_frame_kiezenSM(Behavior):
 										autonomy={'done': Autonomy.Off},
 										remapping={'value': 'overzetnee', 'result': 'overzet'})
 
-			# x:123 y:450
+			# x:170 y:444
 			OperatableStateMachine.add('rod',
 										EqualState(),
 										transitions={'true': 'RepaceOffset_3', 'false': 'RepaceOffset_4'},
@@ -209,7 +211,7 @@ class op_overzetbin_plaatsen_en_frame_kiezenSM(Behavior):
 										autonomy={'true': Autonomy.Off, 'false': Autonomy.Off},
 										remapping={'value_a': 'part_type', 'value_b': 'part1'})
 
-			# x:112 y:359
+			# x:171 y:357
 			OperatableStateMachine.add('pulley',
 										EqualState(),
 										transitions={'true': 'RepaceOffset_2', 'false': 'rod'},
@@ -355,6 +357,20 @@ class op_overzetbin_plaatsen_en_frame_kiezenSM(Behavior):
 										transitions={'continue': 'PreBin3', 'failed': 'failed'},
 										autonomy={'continue': Autonomy.Off, 'failed': Autonomy.Off},
 										remapping={'pose': 'bin3_pose'})
+
+			# x:73 y:182
+			OperatableStateMachine.add('PreBin4',
+										SrdfStateToMoveitAriac(),
+										transitions={'reached': 'gasket', 'planning_failed': 'failed', 'control_failed': 'failed', 'param_error': 'failed'},
+										autonomy={'reached': Autonomy.Off, 'planning_failed': Autonomy.Off, 'control_failed': Autonomy.Off, 'param_error': Autonomy.Off},
+										remapping={'config_name': 'config_name4', 'move_group': 'move_group', 'move_group_prefix': 'move_group_prefix', 'action_topic': 'action_topic', 'robot_name': 'robot_name', 'config_name_out': 'config_name_out', 'move_group_out': 'move_group_out', 'robot_name_out': 'robot_name_out', 'action_topic_out': 'action_topic_out', 'joint_values': 'joint_values', 'joint_names': 'joint_names'})
+
+			# x:17 y:343
+			OperatableStateMachine.add('PreBin1',
+										SrdfStateToMoveitAriac(),
+										transitions={'reached': 'gasket_2', 'planning_failed': 'failed', 'control_failed': 'failed', 'param_error': 'failed'},
+										autonomy={'reached': Autonomy.Off, 'planning_failed': Autonomy.Off, 'control_failed': Autonomy.Off, 'param_error': Autonomy.Off},
+										remapping={'config_name': 'config_name1', 'move_group': 'move_group', 'move_group_prefix': 'move_group_prefix', 'action_topic': 'action_topic', 'robot_name': 'robot_name', 'config_name_out': 'config_name_out', 'move_group_out': 'move_group_out', 'robot_name_out': 'robot_name_out', 'action_topic_out': 'action_topic_out', 'joint_values': 'joint_values', 'joint_names': 'joint_names'})
 
 
 		return _state_machine
