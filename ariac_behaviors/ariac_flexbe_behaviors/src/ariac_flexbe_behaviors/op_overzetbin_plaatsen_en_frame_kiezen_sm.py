@@ -67,8 +67,8 @@ class op_overzetbin_plaatsen_en_frame_kiezenSM(Behavior):
 		_state_machine.userdata.agv1_id = 'agv1'
 		_state_machine.userdata.agv2_id = 'agv2'
 		_state_machine.userdata.part_offset = 0
-		_state_machine.userdata.partoffset1 = 0.035
-		_state_machine.userdata.partoffset2 = 0.081
+		_state_machine.userdata.partoffset1 = 0.037
+		_state_machine.userdata.partoffset2 = 0.085
 		_state_machine.userdata.partoffset3 = 0.02
 		_state_machine.userdata.partoffset4 = 0.025
 		_state_machine.userdata.part_type = ''

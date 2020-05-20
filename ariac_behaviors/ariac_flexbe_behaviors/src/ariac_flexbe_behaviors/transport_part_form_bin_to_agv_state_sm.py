@@ -74,9 +74,8 @@ class transport_part_form_bin_to_agv_stateSM(Behavior):
 		_state_machine.userdata.pose = []
 		_state_machine.userdata.part = ''
 		_state_machine.userdata.tool_link = 'ee_link'
-		_state_machine.userdata.part_offset = 0.035
+		_state_machine.userdata.part_offset = 0
 		_state_machine.userdata.part_rotation = 0
-		_state_machine.userdata.config_name_R1PreAGV1 = 'R1PreAGV1'
 		_state_machine.userdata.agv_pose = []
 		_state_machine.userdata.material_locations = []
 		_state_machine.userdata.bin_location = ''
@@ -98,6 +97,7 @@ class transport_part_form_bin_to_agv_stateSM(Behavior):
 		_state_machine.userdata.agv2_id = 'agv2'
 		_state_machine.userdata.config_namer1b1 = 'R1PreBin1'
 		_state_machine.userdata.config_namer2b4 = 'R2PreBin6'
+		_state_machine.userdata.config_name_preagv = ''
 
 		# Additional creation code can be added inside the following tags
 		# [MANUAL_CREATE]
@@ -158,7 +158,7 @@ class transport_part_form_bin_to_agv_stateSM(Behavior):
 			# x:1106 y:178
 			OperatableStateMachine.add('R1ToPick',
 										MoveitToJointsDynAriacState(),
-										transitions={'reached': 'CloseGripper', 'planning_failed': 'failed', 'control_failed': 'failed'},
+										transitions={'reached': 'CloseGripper', 'planning_failed': 'failed', 'control_failed': 'R1PreGrasp1'},
 										autonomy={'reached': Autonomy.Off, 'planning_failed': Autonomy.Off, 'control_failed': Autonomy.Off},
 										remapping={'move_group_prefix': 'move_group_prefix', 'move_group': 'move_group', 'action_topic': 'action_topic', 'joint_values': 'joint_values', 'joint_names': 'joint_names'})
 
@@ -169,7 +169,7 @@ class transport_part_form_bin_to_agv_stateSM(Behavior):
 										autonomy={'continue': Autonomy.Off, 'failed': Autonomy.Off, 'invalid_arm': Autonomy.Off},
 										remapping={'arm_id': 'arm_id'})
 
-			# x:1329 y:548
+			# x:1517 y:718
 			OperatableStateMachine.add('R1PreAGV1',
 										SrdfStateToMoveitAriac(),
 										transitions={'reached': 'ComputePlacePose', 'planning_failed': 'failed', 'control_failed': 'failed', 'param_error': 'failed'},
@@ -222,7 +222,7 @@ class transport_part_form_bin_to_agv_stateSM(Behavior):
 										autonomy={'continue': Autonomy.Off},
 										remapping={'message': 'part_pose'})
 
-			# x:1238 y:628
+			# x:1233 y:728
 			OperatableStateMachine.add('ComputePlacePose',
 										ComputeGraspPartOffsetAriacState(joint_names=['linear_arm_actuator_joint', 'shoulder_pan_joint', 'shoulder_lift_joint', 'elbow_joint', 'wrist_1_joint', 'wrist_2_joint', 'wrist_3_joint']),
 										transitions={'continue': 'R1ToPlace', 'failed': 'failed'},
@@ -270,13 +270,6 @@ class transport_part_form_bin_to_agv_stateSM(Behavior):
 										autonomy={'true': Autonomy.Off, 'false': Autonomy.Off},
 										remapping={'value_a': 'overzet', 'value_b': 'overzetnee'})
 
-			# x:1469 y:662
-			OperatableStateMachine.add('ComputePlace',
-										ComputeGraspAriacState(joint_names=['linear_arm_actuator_joint', 'shoulder_pan_joint', 'shoulder_lift_joint', 'elbow_joint', 'wrist_1_joint', 'wrist_2_joint', 'wrist_3_joint']),
-										transitions={'continue': 'R1ToPlace', 'failed': 'failed'},
-										autonomy={'continue': Autonomy.Off, 'failed': Autonomy.Off},
-										remapping={'move_group': 'move_group', 'move_group_prefix': 'move_group_prefix', 'tool_link': 'tool_link', 'pose': 'agv_pose', 'offset': 'offset', 'rotation': 'rotation', 'joint_values': 'joint_values', 'joint_names': 'joint_names'})
-
 			# x:1179 y:60
 			OperatableStateMachine.add('op_overzetbin_plaatsen_en_frame_kiezen',
 										self.use_behavior(op_overzetbin_plaatsen_en_frame_kiezenSM, 'op_overzetbin_plaatsen_en_frame_kiezen'),
@@ -287,14 +280,14 @@ class transport_part_form_bin_to_agv_stateSM(Behavior):
 			# x:1324 y:446
 			OperatableStateMachine.add('GetAGV1Pose',
 										GetObjectPoseState(object_frame='kit_tray_1', ref_frame='arm1_linear_arm_actuator'),
-										transitions={'continue': 'R1PreAGV1', 'failed': 'failed'},
+										transitions={'continue': 'R1PreAGV1_2', 'failed': 'failed'},
 										autonomy={'continue': Autonomy.Off, 'failed': Autonomy.Off},
 										remapping={'pose': 'agv_pose'})
 
 			# x:1531 y:492
 			OperatableStateMachine.add('GetAGV1Pose_2',
 										GetObjectPoseState(object_frame='kit_tray_2', ref_frame='arm2_linear_arm_actuator'),
-										transitions={'continue': 'R1PreAGV1', 'failed': 'failed'},
+										transitions={'continue': 'R1PreAGV1_3', 'failed': 'failed'},
 										autonomy={'continue': Autonomy.Off, 'failed': Autonomy.Off},
 										remapping={'pose': 'agv_id'})
 
@@ -305,14 +298,14 @@ class transport_part_form_bin_to_agv_stateSM(Behavior):
 										autonomy={'true': Autonomy.Off, 'false': Autonomy.Off},
 										remapping={'value_a': 'agv_id', 'value_b': 'agv1_id'})
 
-			# x:115 y:501
+			# x:207 y:475
 			OperatableStateMachine.add('R1PreAGV1Back_2',
 										SrdfStateToMoveitAriac(),
 										transitions={'reached': 'finished', 'planning_failed': 'failed', 'control_failed': 'failed', 'param_error': 'failed'},
 										autonomy={'reached': Autonomy.Off, 'planning_failed': Autonomy.Off, 'control_failed': Autonomy.Off, 'param_error': Autonomy.Off},
 										remapping={'config_name': 'config_namer1b1', 'move_group': 'move_group', 'move_group_prefix': 'move_group_prefix', 'action_topic': 'action_topic', 'robot_name': 'robot_name', 'config_name_out': 'config_name_out', 'move_group_out': 'move_group_out', 'robot_name_out': 'robot_name_out', 'action_topic_out': 'action_topic_out', 'joint_values': 'joint_values', 'joint_names': 'joint_names'})
 
-			# x:92 y:652
+			# x:105 y:672
 			OperatableStateMachine.add('R1PreAGV1Back_3',
 										SrdfStateToMoveitAriac(),
 										transitions={'reached': 'finished', 'planning_failed': 'failed', 'control_failed': 'failed', 'param_error': 'failed'},
@@ -325,6 +318,20 @@ class transport_part_form_bin_to_agv_stateSM(Behavior):
 										transitions={'true': 'R1PreAGV1Back_2', 'false': 'R1PreAGV1Back_3'},
 										autonomy={'true': Autonomy.Off, 'false': Autonomy.Off},
 										remapping={'value_a': 'agv_id', 'value_b': 'agv1_id'})
+
+			# x:1419 y:573
+			OperatableStateMachine.add('R1PreAGV1_2',
+										SrdfStateToMoveitAriac(),
+										transitions={'reached': 'R1PreAGV1', 'planning_failed': 'failed', 'control_failed': 'failed', 'param_error': 'failed'},
+										autonomy={'reached': Autonomy.Off, 'planning_failed': Autonomy.Off, 'control_failed': Autonomy.Off, 'param_error': Autonomy.Off},
+										remapping={'config_name': 'config_namer1b1', 'move_group': 'move_group', 'move_group_prefix': 'move_group_prefix', 'action_topic': 'action_topic', 'robot_name': 'robot_name', 'config_name_out': 'config_name_out', 'move_group_out': 'move_group_out', 'robot_name_out': 'robot_name_out', 'action_topic_out': 'action_topic_out', 'joint_values': 'joint_values', 'joint_names': 'joint_names'})
+
+			# x:1569 y:574
+			OperatableStateMachine.add('R1PreAGV1_3',
+										SrdfStateToMoveitAriac(),
+										transitions={'reached': 'R1PreAGV1', 'planning_failed': 'failed', 'control_failed': 'failed', 'param_error': 'failed'},
+										autonomy={'reached': Autonomy.Off, 'planning_failed': Autonomy.Off, 'control_failed': Autonomy.Off, 'param_error': Autonomy.Off},
+										remapping={'config_name': 'config_namer2b4', 'move_group': 'move_group', 'move_group_prefix': 'move_group_prefix', 'action_topic': 'action_topic', 'robot_name': 'robot_name', 'config_name_out': 'config_name_out', 'move_group_out': 'move_group_out', 'robot_name_out': 'robot_name_out', 'action_topic_out': 'action_topic_out', 'joint_values': 'joint_values', 'joint_names': 'joint_names'})
 
 
 		return _state_machine
